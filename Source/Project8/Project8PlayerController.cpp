@@ -35,7 +35,7 @@ AProject8PlayerController::AProject8PlayerController()
 void AProject8PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+    
 	FString CurrentMapName = GetWorld()->GetMapName();
 	if (CurrentMapName.Contains(TEXT("BasicMap")))
 	{
@@ -55,10 +55,8 @@ void AProject8PlayerController::StartGame()
 		MyGameInstance->TotalScore = 0;
 		MyGameInstance->CurrentLevelIndex = 0;
 	}
-
+	SetGameInputMode();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicLevel"));
-	SetPause(false);
-	//SetInputMode(FInputModeGameOnly());
 }
 
 UMenuComponent* AProject8PlayerController::GetMenuComponent() const
@@ -72,21 +70,20 @@ UMenuComponent* AProject8PlayerController::GetMenuComponent() const
 	return nullptr;
 }
 
-void AProject8PlayerController::ResetInput()
+void AProject8PlayerController::SetGameInputMode()
 {
-	// 모든 입력 상태 초기화
-	StopMovement();
-	FollowTime = 0.0f;
-	CachedDestination = FVector::ZeroVector;
-    
-	// 현재 pressed 상태인 모든 키를 release 상태로 변경
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		EnhancedInputComponent->ClearActionEventBindings();
-		EnhancedInputComponent->ClearDebugKeyBindings();
-	}
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
+	SetInputMode(InputMode);
+	
+	SetPause(false);
+}
 
-
+void AProject8PlayerController::SetUIInputMode()
+{
+	SetInputMode(FInputModeUIOnly());
+	SetPause(true);
 }
 
 void AProject8PlayerController::TogglePauseMenu()
@@ -132,12 +129,9 @@ void AProject8PlayerController::OnSetDestinationTriggered()
 
 void AProject8PlayerController::OnSetDestinationReleased()
 {
-	// FlushPressedKeys() 제거
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, 
-		FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
     
-	// 입력 상태 초기화
 	FollowTime = 0.f;
 	bIsTouch = false;
 

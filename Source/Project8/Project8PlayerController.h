@@ -52,7 +52,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	UMenuComponent* GetMenuComponent() const;
 	
-	void ResetInput();
+	void SetGameInputMode();
+
+	void SetUIInputMode();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="UI")
@@ -61,7 +63,6 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay();
 
-	void OnClickMove();
 	void OnInputStarted();
 	void OnSetDestinationTriggered();
 	void OnSetDestinationReleased();

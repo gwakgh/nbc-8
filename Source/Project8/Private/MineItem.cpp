@@ -1,10 +1,11 @@
 #include "MineItem.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AMineItem::AMineItem()
 {
-	ExplosionDelay = 2.5f;
+	ExplosionDelay = 2.f;
 	ExplosionRadius = 300.0f;
 	ExplosionDamage = 30.0f;
 	ItemType = "Mine";
@@ -28,6 +29,24 @@ void AMineItem::ActivateItem(AActor* Activator)
 
 void AMineItem::Explode()
 {
+	if (ExploParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(), 
+			ExploParticle, 
+			GetActorLocation(), 
+			GetActorRotation(), 
+			false);
+	}
+
+	if (ExploSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(), 
+			ExploSound, 
+			GetActorLocation());
+	}
+	
 	TArray<AActor*> OverlappingActors;
 	ExplosionCollision->GetOverlappingActors(OverlappingActors);
 
@@ -45,18 +64,5 @@ void AMineItem::Explode()
 		}
 	}
 
-	PlayEffects();
 	DestroyItem();
-}
-void AMineItem::PlayEffects()
-{
-	if (ExploParticle)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExploParticle, GetActorLocation(), GetActorRotation(), true);
-	}
-
-	if (ExploSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExploSound, GetActorLocation());
-	}
 }

@@ -9,8 +9,6 @@ UMenuComponent::UMenuComponent()
 	  MainMenuInstance(nullptr),
 	  MainMenuClass(nullptr)
 {
-	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 
@@ -35,10 +33,10 @@ void UMenuComponent::ShowGameHUD()
 			if (HUDInstance)
 			{
 				HUDInstance->AddToViewport();
+				P8Controller->SetGameInputMode();
 			}
 		}
 	}
-	
 }
 
 void UMenuComponent::ShowMainMenu()
@@ -55,8 +53,7 @@ void UMenuComponent::ShowMainMenu()
 			MainMenuInstance = CreateWidget<UUserWidget>(P8Controller, MainMenuClass);
 			if (!MainMenuInstance) return;
 			MainMenuInstance->AddToViewport();
-			P8Controller->SetPause(true);
-			P8Controller->SetInputMode(FInputModeUIOnly());
+			P8Controller->SetUIInputMode();
 		}
 	}
 }
@@ -76,15 +73,13 @@ void UMenuComponent::ShowPauseMenu()
 			if (!PauseMenuInstance) return;
 
 			PauseMenuInstance->AddToViewport();
-			P8Controller->SetPause(true);
-			P8Controller->SetInputMode(FInputModeUIOnly());
+			P8Controller->SetUIInputMode();
 		}
 	}
 }
 
 void UMenuComponent::ResumeGame()
 {
-	
 	ClearAllWidgets();
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
 	if (PC)
@@ -92,8 +87,7 @@ void UMenuComponent::ResumeGame()
 		AProject8PlayerController* P8Controller = Cast<AProject8PlayerController>(PC);
 		if (P8Controller)
 		{
-			P8Controller->SetPause(false);
-			P8Controller->SetInputMode(FInputModeGameOnly());
+			P8Controller->SetGameInputMode();
 			ShowGameHUD();
 		}
 	}
@@ -101,8 +95,8 @@ void UMenuComponent::ResumeGame()
 
 void UMenuComponent::GobackToMainMenu()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicMap"));
 	ShowMainMenu();
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicMap"));
 }
 
 UUserWidget* UMenuComponent::GetHUDWidget() const
@@ -115,4 +109,9 @@ void UMenuComponent::ClearAllWidgets()
 	if (MainMenuInstance) { MainMenuInstance->RemoveFromParent(); MainMenuInstance = nullptr; }
 	if (PauseMenuInstance) { PauseMenuInstance->RemoveFromParent(); PauseMenuInstance = nullptr; }
 	if (HUDInstance) { HUDInstance->RemoveFromParent(); HUDInstance = nullptr; }
+}
+
+void UMenuComponent::Initialize(AProject8PlayerController* Controller)
+{
+    CachedController = Controller;
 }
