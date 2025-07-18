@@ -1,8 +1,11 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "Project8GameMode.h"
+#include "Project8Character.h"
+#include "Project8PlayerController.h"
+#include "MyGameState.h"
 
-AProject8GameMode::AProject8GameMode()
+void AProject8GameMode::MyGameMode()
 {
-	// stub
+	DefaultPawnClass = AProject8Character::StaticClass();
+	PlayerControllerClass = AProject8PlayerController::StaticClass();
+	GameStateClass = AMyGameState::StaticClass();
 }

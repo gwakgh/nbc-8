@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
+#include "MenuComponent.h"
 #include "Project8PlayerController.generated.h"
 
 class UNiagaraSystem;
@@ -45,45 +46,14 @@ public:
 
 	AProject8PlayerController();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
-	UUserWidget* HUDWidgetInstance;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MainMenu")
-	TSubclassOf<UUserWidget> MainMenuWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MainMenu")
-	UUserWidget* MainMenuWidgetInstance;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
-	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "PauseMenu")
-	UUserWidget* PauseMenuWidgetInstance;
-	
-	UFUNCTION(BlueprintPure, Category = "UI")
-	UUserWidget* GetHUDWidget() const;
-
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowPauseMenu();
-	
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowGameHUD();
-	
-	UFUNCTION(BlueprintCallable, Category = "MainMenu")
-	void ShowMainMenu(bool bIsRestart);
-	
 	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void StartGame();
-	
-	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
-	void ResumeGame();
-	
-	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
-	void GobackToMainMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UMenuComponent* GetMenuComponent() const;
 protected:
+	UPROPERTY(VisibleAnywhere, Category="UI")
+	UMenuComponent* MenuComponent;
 
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay();
@@ -95,7 +65,6 @@ protected:
 	void OnTouchReleased();
 
 	void TogglePauseMenu();
-	void InitalizeInstance();
 };
 
 
