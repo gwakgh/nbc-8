@@ -2,6 +2,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/RotatingMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AItemBase::AItemBase()
 {
@@ -51,7 +52,29 @@ void AItemBase::ActivateItem(AActor* Activator)
 {
 	if (PickupParticle)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), PickupParticle, GetActorLocation(), GetActorRotation(), true);
+		UParticleSystemComponent* SpawnedParticle = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			PickupParticle,
+			GetActorLocation(),
+			GetActorRotation(),
+			false);
+		
+		if (SpawnedParticle)
+		{
+			FTimerHandle ParticleTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				ParticleTimerHandle,
+				[SpawnedParticle]()
+				{
+					if (SpawnedParticle)
+					{
+						SpawnedParticle->DestroyComponent();
+					}
+				},
+				2.0f,
+				false
+			);
+		}
 	}
 
 	if (PickupSound)

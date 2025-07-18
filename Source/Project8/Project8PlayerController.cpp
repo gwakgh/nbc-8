@@ -35,7 +35,7 @@ AProject8PlayerController::AProject8PlayerController()
 void AProject8PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
+    
 	FString CurrentMapName = GetWorld()->GetMapName();
 	if (CurrentMapName.Contains(TEXT("BasicMap")))
 	{
@@ -44,17 +44,19 @@ void AProject8PlayerController::BeginPlay()
 			MenuComponent->ShowMainMenu();
 		}
 	}
+	
 }
+
+
 void AProject8PlayerController::StartGame()
 {
-	if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
+	if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
 	{
-		SpartaGameInstance->TotalScore = 0;
-		SpartaGameInstance->CurrentLevelIndex = 0;
+		MyGameInstance->TotalScore = 0;
+		MyGameInstance->CurrentLevelIndex = 0;
 	}
-
+	SetGameInputMode();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicLevel"));
-	SetPause(false);
 }
 
 UMenuComponent* AProject8PlayerController::GetMenuComponent() const
@@ -63,11 +65,25 @@ UMenuComponent* AProject8PlayerController::GetMenuComponent() const
 	{
 		return MenuComponent;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("MenuComponent is null!"));
-		return nullptr;
-	}
+	
+	UE_LOG(LogTemp, Error, TEXT("MenuComponent is null!"));
+	return nullptr;
+}
+
+void AProject8PlayerController::SetGameInputMode()
+{
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
+	SetInputMode(InputMode);
+	
+	SetPause(false);
+}
+
+void AProject8PlayerController::SetUIInputMode()
+{
+	SetInputMode(FInputModeUIOnly());
+	SetPause(true);
 }
 
 void AProject8PlayerController::TogglePauseMenu()
@@ -113,13 +129,12 @@ void AProject8PlayerController::OnSetDestinationTriggered()
 
 void AProject8PlayerController::OnSetDestinationReleased()
 {
-	if (FollowTime <= ShortPressThreshold)
-	{
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-	}
-
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+    
 	FollowTime = 0.f;
+	bIsTouch = false;
+
 }
 
 
@@ -145,7 +160,6 @@ void AProject8PlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnTouchReleased);
 		
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::TogglePauseMenu);
-
 	}
 	else
 	{

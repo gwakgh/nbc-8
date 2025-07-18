@@ -51,6 +51,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	UMenuComponent* GetMenuComponent() const;
+	
+	void SetGameInputMode();
+
+	void SetUIInputMode();
+	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="UI")
 	UMenuComponent* MenuComponent;

@@ -38,5 +38,4 @@ protected:
 	virtual void ActivateItem(AActor* Activator) override;
 
 	void Explode();
-	void PlayEffects();
 };

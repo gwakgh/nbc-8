@@ -79,9 +79,10 @@ void AMyGameState::StartLevel()
 		LevelTimerHandle,
 		this,
 		&AMyGameState::OnLevelTimeUp,
-		LevelDuration, false);
+		LevelDuration, false
+		);
 	
-		UpdateHUD();
+	UpdateHUD();
 }
 
 void AMyGameState::EndLevel()

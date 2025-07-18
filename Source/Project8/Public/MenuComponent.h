@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "MenuComponent.generated.h"
 
+class AProject8PlayerController;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT8_API UMenuComponent : public UActorComponent
@@ -48,9 +49,17 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
 	void GobackToMainMenu();
+
+	void CloseMainMenu();
+	
+	void Initialize(AProject8PlayerController* Controller);
+	
 protected:
 	virtual void BeginPlay() override;
 	
 	void ClearAllWidgets();
+
+	UPROPERTY()
+	TObjectPtr<AProject8PlayerController> CachedController;
 		
 };

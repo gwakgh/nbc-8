@@ -1,26 +1,20 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Project8Character.generated.h"
 
-/**
- *  A controllable top-down perspective character
- */
+class UWidgetComponent;
+
 UCLASS(abstract)
 class AProject8Character : public ACharacter
 {
 	GENERATED_BODY()
 
 private:
-
-	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* TopDownCameraComponent;
 
-	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
@@ -34,6 +28,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	virtual void OnDeath();
 	
+	void UpdateOverheadHP();
+	
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 public:
 
@@ -41,8 +37,14 @@ public:
 
 	virtual void BeginPlay() override;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
+	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetHealth() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Health")
+	int32 GetMaxHealthBP() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
