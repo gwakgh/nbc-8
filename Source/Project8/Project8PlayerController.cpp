@@ -39,7 +39,7 @@ void AProject8PlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	FString CurrentMapName = GetWorld()->GetMapName();
-	if (CurrentMapName.Contains(TEXT("MainLevel")))
+	if (CurrentMapName.Contains(TEXT("BasicMap")))
 	{
 		ShowMainMenu(false);
 	}
@@ -50,6 +50,38 @@ UUserWidget* AProject8PlayerController::GetHUDWidget() const
 	return HUDWidgetInstance;
 }
 
+void AProject8PlayerController::ShowPauseMenu()
+{
+	InitalizeInstance();
+	
+	if (PauseMenuWidgetClass)
+	{
+		PauseMenuWidgetInstance = CreateWidget<UUserWidget>(this, PauseMenuWidgetClass);
+		if (PauseMenuWidgetInstance)
+		{
+			SetPause(true);
+			PauseMenuWidgetInstance->AddToViewport();
+			SetInputMode(FInputModeUIOnly());
+		}
+	}
+}
+void AProject8PlayerController::ResumeGame()
+{
+	SetPause(false);
+	SetInputMode(FInputModeGameOnly());
+
+	if (PauseMenuWidgetInstance)
+	{
+		PauseMenuWidgetInstance->RemoveFromParent();
+		PauseMenuWidgetInstance = nullptr;
+	}
+}
+
+void AProject8PlayerController::GobackToMainMenu()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicMap"));
+	ShowMainMenu(false);
+}
 void AProject8PlayerController::ShowGameHUD()
 {
 	if (HUDWidgetInstance)
@@ -82,24 +114,15 @@ void AProject8PlayerController::ShowGameHUD()
 
 void AProject8PlayerController::ShowMainMenu(bool bIsRestart)
 {
-	if (HUDWidgetInstance)
-	{
-		HUDWidgetInstance->RemoveFromParent();
-		HUDWidgetClass = nullptr;
-	}
-
-	if (MainMenuWidgetInstance)
-	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetClass = nullptr;
-	}
-
+	InitalizeInstance();
+	
 	if (MainMenuWidgetClass)
 	{
 		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
 		if (MainMenuWidgetInstance)
 		{
 			MainMenuWidgetInstance->AddToViewport();
+			
 			SetInputMode(FInputModeUIOnly());
 		}
 
@@ -174,6 +197,9 @@ void AProject8PlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::OnTouchTriggered);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &AProject8PlayerController::OnTouchReleased);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnTouchReleased);
+		
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::TogglePauseMenu);
+
 	}
 	else
 	{
@@ -242,4 +268,39 @@ void AProject8PlayerController::OnTouchReleased()
 {
 	bIsTouch = false;
 	OnSetDestinationReleased();
+}
+
+void AProject8PlayerController::TogglePauseMenu()
+{
+	if (PauseMenuWidgetInstance && PauseMenuWidgetInstance->IsInViewport())
+	{
+		// 메뉴가 열려있다면 닫고 게임 재개
+		ResumeGame();
+	}
+	else
+	{
+		// 메뉴가 닫혀있다면 열고 게임 일시정지
+		ShowPauseMenu();
+	}
+}
+
+void AProject8PlayerController::InitalizeInstance()
+{
+	if (HUDWidgetInstance)
+	{
+		HUDWidgetInstance->RemoveFromParent();
+		HUDWidgetClass = nullptr;
+	}
+
+	if (MainMenuWidgetInstance)
+	{
+		MainMenuWidgetInstance->RemoveFromParent();
+		MainMenuWidgetClass = nullptr;
+	}
+
+	if (PauseMenuWidgetInstance)
+	{
+		PauseMenuWidgetInstance->RemoveFromParent();
+		PauseMenuWidgetClass = nullptr;
+	}
 }

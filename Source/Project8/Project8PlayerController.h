@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,10 +11,6 @@ class UInputAction;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
-/**
- *  Player controller for a top-down perspective game.
- *  Implements point and click based controls
- */
 UCLASS(abstract)
 class AProject8PlayerController : public APlayerController
 {
@@ -24,36 +18,27 @@ class AProject8PlayerController : public APlayerController
 
 protected:
 
-	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ShortPressThreshold;
 
-	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UNiagaraSystem* FXCursor;
 
-	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 	
-	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* SetDestinationClickAction;
 
-	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* SetDestinationTouchAction;
 
-	/** True if the controlled character should navigate to the mouse cursor. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input)
+	UInputAction* PauseAction;
+	
 	uint32 bMoveToMouseCursor : 1;
-
-	/** Set to true if we're using touch input */
 	uint32 bIsTouch : 1;
-
-	/** Saved location of the character movement destination */
 	FVector CachedDestination;
-
-	/** Time that the click input has been pressed */
 	float FollowTime = 0.0f;
 
 public:
@@ -72,9 +57,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MainMenu")
 	UUserWidget* MainMenuWidgetInstance;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
+	TSubclassOf<UUserWidget> PauseMenuWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "PauseMenu")
+	UUserWidget* PauseMenuWidgetInstance;
+	
 	UFUNCTION(BlueprintPure, Category = "UI")
 	UUserWidget* GetHUDWidget() const;
 
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowPauseMenu();
+	
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
 	
@@ -83,6 +77,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void StartGame();
+	
+	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
+	void ResumeGame();
+	
+	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
+	void GobackToMainMenu();
 protected:
 
 	virtual void SetupInputComponent() override;
@@ -94,6 +94,8 @@ protected:
 	void OnTouchTriggered();
 	void OnTouchReleased();
 
+	void TogglePauseMenu();
+	void InitalizeInstance();
 };
 
 
