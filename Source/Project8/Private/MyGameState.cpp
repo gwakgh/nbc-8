@@ -35,17 +35,17 @@ void AMyGameState::StartLevel()
 	{
 		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PlayerController))
 		{
-			MyPlayerController->ShowGameHUD();
+			MyPlayerController->GetMenuComponent()->ShowGameHUD();
 		}
 	}
 	
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
 	{
 		
-		UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance);
-		if (SpartaGameInstance)
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (MyGameInstance)
 		{
-			CurrentLevelIndex = SpartaGameInstance->CurrentLevelIndex;
+			CurrentLevelIndex = MyGameInstance->CurrentLevelIndex;
 		}
 		
 	}
@@ -90,12 +90,12 @@ void AMyGameState::EndLevel()
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
 	{
 		
-		UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance);
-		if (SpartaGameInstance)
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (MyGameInstance)
 		{
 			AddScore(Score);
 			CurrentLevelIndex++;
-			SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
+			MyGameInstance->CurrentLevelIndex = CurrentLevelIndex;
 		}
 		
 	}
@@ -132,10 +132,10 @@ void AMyGameState::AddScore(int32 Amount)
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
 	{
 		
-		UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance);
-		if (SpartaGameInstance)
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (MyGameInstance)
 		{
-			SpartaGameInstance->AddToScore(Amount);
+			MyGameInstance->AddToScore(Amount);
 		}
 		
 	}
@@ -148,7 +148,7 @@ void AMyGameState::OnGameOver()
 		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PlayerController))
 		{
 			MyPlayerController->SetPause(true);
-			MyPlayerController->ShowMainMenu(true);
+			MyPlayerController->GetMenuComponent()->ShowMainMenu();
 		}
 	}
 }
@@ -168,10 +168,10 @@ void AMyGameState::UpdateHUD()
 {
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		if (AProject8PlayerController* SpartaPlayerController = Cast<AProject8PlayerController>(PlayerController))
+		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PlayerController))
 		{
 			
-			if (UUserWidget* HUDWidget = SpartaPlayerController->GetHUDWidget())
+			if (UUserWidget* HUDWidget = MyPlayerController->GetMenuComponent()->GetHUDWidget())
 			{
 				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("TimeValue"))))
 				{
@@ -183,9 +183,9 @@ void AMyGameState::UpdateHUD()
 				{
 					if (UGameInstance* GameInstance = GetGameInstance())
 					{
-						if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(GameInstance))
+						if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance))
 						{
-							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), SpartaGameInstance->TotalScore)));
+							ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), MyGameInstance->TotalScore)));
 						}
 					}
 				}

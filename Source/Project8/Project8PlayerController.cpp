@@ -20,11 +20,9 @@
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AProject8PlayerController::AProject8PlayerController()
-	: HUDWidgetInstance(nullptr),
-	  HUDWidgetClass(nullptr),
-	  MainMenuWidgetInstance(nullptr),
-	  MainMenuWidgetClass(nullptr)
 {
+    MenuComponent = CreateDefaultSubobject<UMenuComponent>(TEXT("MenuComponent"));
+	
 	bIsTouch = false;
 	bMoveToMouseCursor = false;
 
@@ -39,104 +37,14 @@ void AProject8PlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	FString CurrentMapName = GetWorld()->GetMapName();
-	if (CurrentMapName.Contains(TEXT("MainLevel")))
+	if (CurrentMapName.Contains(TEXT("BasicMap")))
 	{
-		ShowMainMenu(false);
-	}
-}
-
-UUserWidget* AProject8PlayerController::GetHUDWidget() const
-{
-	return HUDWidgetInstance;
-}
-
-void AProject8PlayerController::ShowGameHUD()
-{
-	if (HUDWidgetInstance)
-	{
-		HUDWidgetInstance->RemoveFromParent();
-		HUDWidgetClass = nullptr;
-	}
-
-	if (MainMenuWidgetInstance)
-	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetClass = nullptr;
-	}
-
-	if (HUDWidgetClass)
-	{
-		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-		if (HUDWidgetInstance)
+		if (MenuComponent)
 		{
-			HUDWidgetInstance->AddToViewport();
-			SetInputMode(FInputModeGameOnly());
-		}
-		AMyGameState* GameState = GetWorld()->GetGameState<AMyGameState>();
-		if (GameState)
-		{
-			GameState->UpdateHUD();
+			MenuComponent->ShowMainMenu();
 		}
 	}
 }
-
-void AProject8PlayerController::ShowMainMenu(bool bIsRestart)
-{
-	if (HUDWidgetInstance)
-	{
-		HUDWidgetInstance->RemoveFromParent();
-		HUDWidgetClass = nullptr;
-	}
-
-	if (MainMenuWidgetInstance)
-	{
-		MainMenuWidgetInstance->RemoveFromParent();
-		MainMenuWidgetClass = nullptr;
-	}
-
-	if (MainMenuWidgetClass)
-	{
-		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
-		if (MainMenuWidgetInstance)
-		{
-			MainMenuWidgetInstance->AddToViewport();
-			SetInputMode(FInputModeUIOnly());
-		}
-
-		if (UTextBlock* ButtonText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("StartButtonText"))))
-		{
-			if (bIsRestart)
-			{
-				ButtonText->SetText(FText::FromString(FString::Printf(TEXT("ReStart"))));
-			}
-			else
-			{
-				ButtonText->SetText(FText::FromString(FString::Printf(TEXT("Start"))));
-			}
-		}
-
-		if (bIsRestart)
-		{
-			UFunction* PlayAnimFunc = MainMenuWidgetInstance->FindFunction(FName("PlayGameOverAnim"));
-			if (PlayAnimFunc)
-			{
-				MainMenuWidgetInstance->ProcessEvent(PlayAnimFunc, nullptr);
-			}
-
-			if (UTextBlock* ScoreText = Cast<UTextBlock>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("TotalScoreText"))))
-			{
-				if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
-				{
-					ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Total Score: %d"), SpartaGameInstance->TotalScore)));
-				}
-			}
-		}
-	}
-	SetPause(true);
-	bShowMouseCursor = true;
-	SetInputMode(FInputModeUIOnly());
-}
-
 void AProject8PlayerController::StartGame()
 {
 	if (UMyGameInstance* SpartaGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(this)))
@@ -149,35 +57,24 @@ void AProject8PlayerController::StartGame()
 	SetPause(false);
 }
 
-void AProject8PlayerController::SetupInputComponent()
+UMenuComponent* AProject8PlayerController::GetMenuComponent() const
 {
-	// set up gameplay key bindings
-	Super::SetupInputComponent();
-
-	// Add Input Mapping Context
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	if (MenuComponent)
 	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	}
-
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		// Setup mouse input events
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &AProject8PlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &AProject8PlayerController::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnSetDestinationReleased);
-
-		// Setup touch input events
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &AProject8PlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::OnTouchTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &AProject8PlayerController::OnTouchReleased);
-		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnTouchReleased);
+		return MenuComponent;
 	}
 	else
 	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogTemp, Error, TEXT("MenuComponent is null!"));
+		return nullptr;
+	}
+}
+
+void AProject8PlayerController::TogglePauseMenu()
+{
+	if (MenuComponent)
+	{
+		MenuComponent->ShowPauseMenu();
 	}
 }
 
@@ -188,10 +85,8 @@ void AProject8PlayerController::OnInputStarted()
 
 void AProject8PlayerController::OnSetDestinationTriggered()
 {
-	// We flag that the input is being pressed
 	FollowTime += GetWorld()->GetDeltaSeconds();
 	
-	// We look for the location in the world where the player has pressed the input
 	FHitResult Hit;
 	bool bHitSuccessful = false;
 	if (bIsTouch)
@@ -203,13 +98,11 @@ void AProject8PlayerController::OnSetDestinationTriggered()
 		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
 	}
 
-	// If we hit a surface, cache the location
 	if (bHitSuccessful)
 	{
 		CachedDestination = Hit.Location;
 	}
 	
-	// Move towards mouse pointer or touch
 	APawn* ControlledPawn = GetPawn();
 	if (ControlledPawn != nullptr)
 	{
@@ -220,10 +113,8 @@ void AProject8PlayerController::OnSetDestinationTriggered()
 
 void AProject8PlayerController::OnSetDestinationReleased()
 {
-	// If it was a short press
 	if (FollowTime <= ShortPressThreshold)
 	{
-		// We move there and spawn some particles
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 	}
@@ -231,7 +122,36 @@ void AProject8PlayerController::OnSetDestinationReleased()
 	FollowTime = 0.f;
 }
 
-// Triggered every frame when the input is held down
+
+void AProject8PlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &AProject8PlayerController::OnInputStarted);
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::OnSetDestinationTriggered);
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &AProject8PlayerController::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnSetDestinationReleased);
+
+		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &AProject8PlayerController::OnInputStarted);
+		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::OnTouchTriggered);
+		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &AProject8PlayerController::OnTouchReleased);
+		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &AProject8PlayerController::OnTouchReleased);
+		
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &AProject8PlayerController::TogglePauseMenu);
+
+	}
+	else
+	{
+		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
 void AProject8PlayerController::OnTouchTriggered()
 {
 	bIsTouch = true;
