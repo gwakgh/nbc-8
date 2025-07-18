@@ -35,11 +35,10 @@ void UMenuComponent::ShowGameHUD()
 			if (HUDInstance)
 			{
 				HUDInstance->AddToViewport();
-				P8Controller->SetInputMode(FInputModeGameOnly());
 			}
-			
 		}
 	}
+	
 }
 
 void UMenuComponent::ShowMainMenu()
@@ -85,6 +84,7 @@ void UMenuComponent::ShowPauseMenu()
 
 void UMenuComponent::ResumeGame()
 {
+	
 	ClearAllWidgets();
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
 	if (PC)
