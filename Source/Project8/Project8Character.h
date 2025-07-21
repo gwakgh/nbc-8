@@ -8,6 +8,7 @@ class UWidgetComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, ChangedAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlowStatusChangedSignature, bool, bIsSlowed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReverseStatusChangedSignature, bool, bIsReversed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBlindStatusChangedSignature, bool, bIsBlind);
 
 UCLASS(abstract)
 class AProject8Character : public ACharacter
@@ -54,6 +55,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSlowStatusChangedSignature OnReverseStatusChanged;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSlowStatusChangedSignature OnBlindStatusChanged;
 	
 	UFUNCTION(BlueprintPure, Category = "Status")
 	float GetSlowEffectRemainingTime() const;

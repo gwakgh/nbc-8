@@ -93,7 +93,12 @@ void AProject8Character::ApplySlowEffect(float SlowAmount, float Duration)
 		OnSlowStatusChanged.Broadcast(true);
 		MoveComp->MaxWalkSpeed = FMath::Max(0.f, OriginalWalkSpeed - SlowAmount);
 		GetWorldTimerManager().ClearTimer(TimerHandle_SlowEffect);
-		GetWorldTimerManager().SetTimer(TimerHandle_SlowEffect, this, &AProject8Character::RestoreMovementSpeed, Duration, false);
+		GetWorldTimerManager().SetTimer(
+			TimerHandle_SlowEffect,
+			this,
+			&AProject8Character::RestoreMovementSpeed,
+			Duration,
+			false);
 	}
 }
 
