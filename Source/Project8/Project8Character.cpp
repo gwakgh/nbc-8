@@ -70,6 +70,7 @@ int32 AProject8Character::GetMaxHealthBP() const
 void AProject8Character::AddHealth(float Amount)
 {
 	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Amount);
 	UpdateOverheadHP();
 }
 

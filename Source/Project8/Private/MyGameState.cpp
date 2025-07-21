@@ -16,6 +16,8 @@ AMyGameState::AMyGameState()
 	LevelDuration = 30.f;
 	CurrentLevelIndex = 0;
 	MaxLevels = 4;
+	
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AMyGameState::BeginPlay()
@@ -31,24 +33,24 @@ void AMyGameState::BeginPlay()
 
 void AMyGameState::StartLevel()
 {
-	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
-		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PlayerController))
+		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PC))
 		{
 			MyPlayerController->GetMenuComponent()->ShowGameHUD();
 		}
 	}
-	
+
 	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
 	{
-		
 		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
 		if (MyGameInstance)
 		{
+			Score = MyGameInstance->TotalScore;
 			CurrentLevelIndex = MyGameInstance->CurrentLevelIndex;
 		}
-		
 	}
+
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
 
@@ -56,12 +58,10 @@ void AMyGameState::StartLevel()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
 	const int32 ItemToSpawn = 40;
-
 	for (int32 i = 0; i < ItemToSpawn; i++)
 	{
 		if (FoundVolumes.Num() > 0)
 		{
-			
 			ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
 			if (SpawnVolume)
 			{
@@ -71,17 +71,16 @@ void AMyGameState::StartLevel()
 					SpawnedCoinCount++;
 				}
 			}
-			
 		}
 	}
 
 	GetWorldTimerManager().SetTimer(
-		LevelTimerHandle,
-		this,
-		&AMyGameState::OnLevelTimeUp,
-		LevelDuration, false
-		);
-	
+	   LevelTimerHandle,
+	   this,
+	   &AMyGameState::OnLevelTimeUp,
+	   LevelDuration, false
+	);
+    
 	UpdateHUD();
 }
 

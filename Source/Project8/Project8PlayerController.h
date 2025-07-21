@@ -12,6 +12,13 @@ class UInputAction;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+enum class EIntroState : uint8
+{
+	None,       
+	Blending,   
+	ViewingPaused
+};
+
 UCLASS(abstract)
 class AProject8PlayerController : public APlayerController
 {
@@ -56,19 +63,19 @@ public:
 
 	void SetUIInputMode();
 	
+	
 protected:
 	UPROPERTY(VisibleAnywhere, Category="UI")
 	UMenuComponent* MenuComponent;
-
+	
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay();
-
+	
 	void OnInputStarted();
 	void OnSetDestinationTriggered();
 	void OnSetDestinationReleased();
 	void OnTouchTriggered();
 	void OnTouchReleased();
-
 	void TogglePauseMenu();
 };
 

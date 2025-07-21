@@ -35,6 +35,7 @@ AProject8PlayerController::AProject8PlayerController()
 void AProject8PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
     
 	FString CurrentMapName = GetWorld()->GetMapName();
 	if (CurrentMapName.Contains(TEXT("BasicMap")))
@@ -44,9 +45,7 @@ void AProject8PlayerController::BeginPlay()
 			MenuComponent->ShowMainMenu();
 		}
 	}
-	
 }
-
 
 void AProject8PlayerController::StartGame()
 {
@@ -85,6 +84,7 @@ void AProject8PlayerController::SetUIInputMode()
 	SetInputMode(FInputModeUIOnly());
 	SetPause(true);
 }
+
 
 void AProject8PlayerController::TogglePauseMenu()
 {
@@ -134,7 +134,6 @@ void AProject8PlayerController::OnSetDestinationReleased()
     
 	FollowTime = 0.f;
 	bIsTouch = false;
-
 }
 
 

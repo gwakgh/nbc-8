@@ -55,4 +55,6 @@ public:
 	void OnCoinCollected();
 
 	void UpdateHUD();
+
+protected:
 };

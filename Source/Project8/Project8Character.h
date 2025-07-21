@@ -5,6 +5,7 @@
 #include "Project8Character.generated.h"
 
 class UWidgetComponent;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, ChangedAmount);
 
 UCLASS(abstract)
 class AProject8Character : public ACharacter
@@ -48,6 +49,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
+	
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChangedSignature OnHealthChanged;
 
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 
