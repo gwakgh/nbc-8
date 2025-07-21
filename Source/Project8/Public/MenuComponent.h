@@ -38,6 +38,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "PauseMenu")
 	UUserWidget* PauseMenuInstance;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlindMenu")
+	TSubclassOf<UUserWidget> BlindEffectWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlindMenu")
+	UUserWidget* BlindEffectWidgetInstance;
+	
 	UFUNCTION(BlueprintPure, Category = "UI")
 	UUserWidget* GetHUDWidget() const;
 
@@ -46,6 +52,11 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void ShowGameHUD();
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowBlindMenu(float Duration);
+
+	void DeactivateBlindEffect();
 	
 	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void ShowMainMenu();

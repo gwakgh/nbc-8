@@ -41,6 +41,8 @@ void AMyGameState::StartWave()
 {
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
+
+	UE_LOG(LogTemp, Warning, TEXT("Wave %d 시작!"), CurrentWave + 1);
 	
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
@@ -53,7 +55,9 @@ void AMyGameState::StartWave()
 	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
-	const int32 ItemToSpawn = (CurrentLevelIndex + 1) * 15;
+	int SpawnItemCount = (CurrentLevelIndex + 1) * 10 + (CurrentWave + 1) * 5;
+	const int32 ItemToSpawn = FMath::RandRange(SpawnItemCount - 5, SpawnItemCount + 5);
+	
 	for (int32 i = 0; i < ItemToSpawn; i++)
 	{
 		if (FoundVolumes.Num() > 0)

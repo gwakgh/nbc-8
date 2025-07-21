@@ -5,12 +5,17 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
+#include "Project8Character.h"
 
 UMenuComponent::UMenuComponent()
 	: HUDInstance(nullptr),
 	  HUDClass(nullptr),
 	  MainMenuInstance(nullptr),
-	  MainMenuClass(nullptr)
+	  MainMenuClass(nullptr),
+	  GameOverMenuClass(nullptr),
+	  GameOverMenuInstance(nullptr),
+	  BlindEffectWidgetClass(nullptr),
+	  BlindEffectWidgetInstance(nullptr)
 {
 }
 
@@ -42,6 +47,55 @@ void UMenuComponent::ShowGameHUD()
 	}
 }
 
+void UMenuComponent::ShowBlindMenu(float Duration)
+{
+	if (!BlindEffectWidgetClass)	return;
+	if (BlindEffectWidgetClass && !BlindEffectWidgetInstance)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetOwner());
+		if (PC)
+		{
+			AProject8PlayerController* P8Controller = Cast<AProject8PlayerController>(PC);
+			if (P8Controller)
+			{
+		
+				AProject8Character* PlayerCharacter = Cast<AProject8Character>(P8Controller->GetPawn());
+				if (PlayerCharacter)
+				{
+					PlayerCharacter->OnBlindStatusChanged.Broadcast(true);
+				}
+				BlindEffectWidgetInstance = CreateWidget<UUserWidget>(P8Controller, BlindEffectWidgetClass);
+				BlindEffectWidgetInstance->AddToViewport();
+
+				FTimerHandle TimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UMenuComponent::DeactivateBlindEffect, Duration, false);
+			}
+		}
+	}
+}
+
+void UMenuComponent::DeactivateBlindEffect()
+{
+	if (BlindEffectWidgetInstance)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetOwner());
+		if (PC)
+		{
+			AProject8PlayerController* P8Controller = Cast<AProject8PlayerController>(PC);
+			if (P8Controller)
+			{
+				AProject8Character* PlayerCharacter = Cast<AProject8Character>(P8Controller->GetPawn());
+				if (PlayerCharacter)
+				{
+					PlayerCharacter->OnBlindStatusChanged.Broadcast(false);
+				}
+			}
+		}
+		BlindEffectWidgetInstance->RemoveFromParent();
+		BlindEffectWidgetInstance = nullptr;
+	}
+}
+
 void UMenuComponent::ShowMainMenu()
 {
 	ClearAllWidgets();
@@ -64,7 +118,7 @@ void UMenuComponent::ShowGameOverMenu()
 {
 	ClearAllWidgets();
 
-	if (!PauseMenuClass) return;
+	if (!GameOverMenuClass) return;
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
 	if (PC)
 	{
