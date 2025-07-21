@@ -50,10 +50,11 @@ void AItemBase::OnItemEndOverlap(
 
 void AItemBase::ActivateItem(AActor* Activator)
 {
-	if (PickupParticle)
+	UWorld* World = GetWorld();
+	if (World && PickupParticle)
 	{
 		UParticleSystemComponent* SpawnedParticle = UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(),
+			World,
 			PickupParticle,
 			GetActorLocation(),
 			GetActorRotation(),
@@ -66,7 +67,7 @@ void AItemBase::ActivateItem(AActor* Activator)
 				ParticleTimerHandle,
 				[SpawnedParticle]()
 				{
-					if (SpawnedParticle)
+					if (IsValid(SpawnedParticle))
 					{
 						SpawnedParticle->DestroyComponent();
 					}
@@ -77,9 +78,9 @@ void AItemBase::ActivateItem(AActor* Activator)
 		}
 	}
 
-	if (PickupSound)
+	if (World && PickupSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(World, PickupSound, GetActorLocation());
 	}
 }
 
