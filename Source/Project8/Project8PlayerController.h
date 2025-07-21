@@ -49,15 +49,25 @@ protected:
 	FVector CachedDestination;
 	float FollowTime = 0.0f;
 
+	bool bIsMovementReversed;
+	
+    void DeactivateReverseMovement();
+
+	FTimerHandle TimerHandle_ReverseMovement;
 public:
 
 	AProject8PlayerController();
+	
+	UFUNCTION(BlueprintPure, Category = "Status")
+	float GetReverseEffectRemainingTime() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "MainMenu")
 	void StartGame();
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	UMenuComponent* GetMenuComponent() const;
+	
+    void ActivateReverseMovement(float Duration);
 	
 	void SetGameInputMode();
 

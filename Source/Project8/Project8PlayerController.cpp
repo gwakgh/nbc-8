@@ -25,11 +25,17 @@ AProject8PlayerController::AProject8PlayerController()
 	
 	bIsTouch = false;
 	bMoveToMouseCursor = false;
+    bIsMovementReversed = false;
 
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
+}
+
+float AProject8PlayerController::GetReverseEffectRemainingTime() const
+{
+	return GetWorldTimerManager().GetTimerRemaining(TimerHandle_ReverseMovement);
 }
 
 void AProject8PlayerController::BeginPlay()
@@ -67,6 +73,36 @@ UMenuComponent* AProject8PlayerController::GetMenuComponent() const
 	
 	UE_LOG(LogTemp, Error, TEXT("MenuComponent is null!"));
 	return nullptr;
+}
+
+void AProject8PlayerController::ActivateReverseMovement(float Duration)
+{
+	bIsMovementReversed = true;
+
+	AProject8Character* PlayerCharacter = Cast<AProject8Character>(GetPawn());
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->OnReverseStatusChanged.Broadcast(true);
+	}
+
+	GetWorldTimerManager().ClearTimer(TimerHandle_ReverseMovement);
+
+	GetWorldTimerManager().SetTimer(
+	   TimerHandle_ReverseMovement, 
+	   this, 
+	   &AProject8PlayerController::DeactivateReverseMovement, 
+	   Duration, 
+	   false);
+}
+
+void AProject8PlayerController::DeactivateReverseMovement()
+{
+	AProject8Character* PlayerCharacter = Cast<AProject8Character>(GetPawn());
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->OnReverseStatusChanged.Broadcast(false);
+	}
+    bIsMovementReversed = false;
 }
 
 void AProject8PlayerController::SetGameInputMode()
@@ -123,6 +159,12 @@ void AProject8PlayerController::OnSetDestinationTriggered()
 	if (ControlledPawn != nullptr)
 	{
 		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		
+		if (bIsMovementReversed)
+		{
+			WorldDirection *= -1.0f;
+		}
+		
 		ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
 	}
 }
