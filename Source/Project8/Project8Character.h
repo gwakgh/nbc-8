@@ -6,6 +6,7 @@
 
 class UWidgetComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, ChangedAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlowStatusChangedSignature, bool, bIsSlowed);
 
 UCLASS(abstract)
 class AProject8Character : public ACharacter
@@ -19,6 +20,12 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	void RestoreMovementSpeed();
+
+	FTimerHandle TimerHandle_SlowEffect;
+	
+	float OriginalWalkSpeed;
+	
 protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
@@ -41,6 +48,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	UWidgetComponent* OverheadWidget;
 	
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSlowStatusChangedSignature OnSlowStatusChanged;
+	
+	UFUNCTION(BlueprintPure, Category = "Status")
+	float GetSlowEffectRemainingTime() const;
+	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetHealth() const;
 	
@@ -49,6 +62,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
+	
+	UFUNCTION(BlueprintCallable, Category = "Speed")
+    void ApplySlowEffect(float SlowAmount, float Duration);
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedSignature OnHealthChanged;

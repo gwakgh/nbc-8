@@ -31,8 +31,8 @@ AProject8Character::AProject8Character()
 
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetUsingAbsoluteRotation(true);
-	CameraBoom->TargetArmLength = 2000.f;
-	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
+	CameraBoom->TargetArmLength = 1400.f;
+	CameraBoom->SetWorldRotation(FRotator(0.f, -50.f, 45.f));
 	CameraBoom->bDoCollisionTest = false;
 	
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
@@ -49,12 +49,24 @@ AProject8Character::AProject8Character()
 	
 	MaxHealth = 100.0f;
 	Health = MaxHealth;
+	
 }
 
 void AProject8Character::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		OriginalWalkSpeed = MoveComp->MaxWalkSpeed;
+	}
+	
 	UpdateOverheadHP();
+}
+
+float AProject8Character::GetSlowEffectRemainingTime() const
+{
+	return GetWorldTimerManager().GetTimerRemaining(TimerHandle_SlowEffect);
 }
 
 int32 AProject8Character::GetHealth() const
@@ -72,6 +84,26 @@ void AProject8Character::AddHealth(float Amount)
 	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
     OnHealthChanged.Broadcast(Amount);
 	UpdateOverheadHP();
+}
+
+void AProject8Character::ApplySlowEffect(float SlowAmount, float Duration)
+{
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		OnSlowStatusChanged.Broadcast(true);
+		MoveComp->MaxWalkSpeed = FMath::Max(0.f, OriginalWalkSpeed - SlowAmount);
+		GetWorldTimerManager().ClearTimer(TimerHandle_SlowEffect);
+		GetWorldTimerManager().SetTimer(TimerHandle_SlowEffect, this, &AProject8Character::RestoreMovementSpeed, Duration, false);
+	}
+}
+
+void AProject8Character::RestoreMovementSpeed()
+{
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->MaxWalkSpeed = OriginalWalkSpeed;
+		OnSlowStatusChanged.Broadcast(false);
+	}
 }
 
 void AProject8Character::OnDeath()
