@@ -75,10 +75,14 @@ AActor* ASpawnVolume::SpawnItem(TSubclassOf<AActor> ItemClass)
 {
 	if (!ItemClass)	return nullptr;
 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(
 		ItemClass,
 		GetRandomPointInVolume(),
-		FRotator::ZeroRotator
+		FRotator::ZeroRotator,
+		SpawnParams 
 		);
 
 	return SpawnedActor;

@@ -34,7 +34,7 @@ void AItemBase::OnItemOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (OtherActor)// && OtherActor->ActorHasTag("Player"))
+	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
 		ActivateItem(OtherActor);
 	}
@@ -67,12 +67,12 @@ void AItemBase::ActivateItem(AActor* Activator)
 				ParticleTimerHandle,
 				[SpawnedParticle]()
 				{
-					if (IsValid(SpawnedParticle))
+					if (SpawnedParticle && SpawnedParticle->IsValidLowLevelFast())
 					{
 						SpawnedParticle->DestroyComponent();
 					}
 				},
-				2.0f,
+				0.9f,
 				false
 			);
 		}

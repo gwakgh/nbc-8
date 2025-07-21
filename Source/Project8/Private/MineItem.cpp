@@ -5,7 +5,7 @@
 
 AMineItem::AMineItem()
 {
-	ExplosionDelay = 2.f;
+	ExplosionDelay = 0.9f;
 	ExplosionRadius = 300.0f;
 	ExplosionDamage = 30.0f;
 	ItemType = "Mine";
@@ -19,11 +19,14 @@ AMineItem::AMineItem()
 
 void AMineItem::ActivateItem(AActor* Activator)
 {
-	if (!bIsExploding)
+	if (Activator && Activator->ActorHasTag("Player"))
 	{
-		bIsExploding = true;
-		GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, this, &AMineItem::Explode, ExplosionDelay);
-		Super::ActivateItem(Activator);
+		if (!bIsExploding)
+		{
+			bIsExploding = true;
+			GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, this, &AMineItem::Explode, ExplosionDelay);
+			Super::ActivateItem(Activator);
+		}
 	}
 }
 
