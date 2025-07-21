@@ -8,14 +8,20 @@
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
 
+
 AMyGameState::AMyGameState()
 {
 	Score = 0;
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
+	
 	LevelDuration = 30.f;
 	CurrentLevelIndex = 0;
-	MaxLevels = 4;
+	MaxLevels = 3;
+
+	WaveDuration = 10.f;
+	CurrentWave = 0;
+	MaxWaves = 3;
 	
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -31,8 +37,11 @@ void AMyGameState::BeginPlay()
 		0.1f, true);
 }
 
-void AMyGameState::StartLevel()
+void AMyGameState::StartWave()
 {
+	SpawnedCoinCount = 0;
+	CollectedCoinCount = 0;
+	
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PC))
@@ -40,24 +49,11 @@ void AMyGameState::StartLevel()
 			MyPlayerController->GetMenuComponent()->ShowGameHUD();
 		}
 	}
-
-	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
-	{
-		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
-		if (MyGameInstance)
-		{
-			Score = MyGameInstance->TotalScore;
-			CurrentLevelIndex = MyGameInstance->CurrentLevelIndex;
-		}
-	}
-
-	SpawnedCoinCount = 0;
-	CollectedCoinCount = 0;
-
+	
 	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
-	const int32 ItemToSpawn = 40;
+	const int32 ItemToSpawn = (CurrentLevelIndex + 1) * 15;
 	for (int32 i = 0; i < ItemToSpawn; i++)
 	{
 		if (FoundVolumes.Num() > 0)
@@ -75,13 +71,48 @@ void AMyGameState::StartLevel()
 	}
 
 	GetWorldTimerManager().SetTimer(
-	   LevelTimerHandle,
+	   WaveTimerHandle,
 	   this,
-	   &AMyGameState::OnLevelTimeUp,
-	   LevelDuration, false
+	   &AMyGameState::OnWaveTimeUp,
+	   WaveDuration, false
 	);
     
 	UpdateHUD();
+}
+
+void AMyGameState::EndWave()
+{
+	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
+	CurrentWave++;
+
+	if (CurrentWave > MaxWaves)
+	{
+		EndLevel();
+	}
+	else
+	{
+		StartWave();
+	}
+}
+
+void AMyGameState::OnWaveTimeUp()
+{
+	EndWave();
+}
+void AMyGameState::StartLevel()
+{
+	CurrentWave = 1;
+	StartWave();
+	
+	if (UGameInstance* GameInstance = GetWorld()->GetGameInstance())
+	{
+		UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(GameInstance);
+		if (MyGameInstance)
+		{
+			Score = MyGameInstance->TotalScore;
+			CurrentLevelIndex = MyGameInstance->CurrentLevelIndex;
+		}
+	}
 }
 
 void AMyGameState::EndLevel()
@@ -148,7 +179,7 @@ void AMyGameState::OnGameOver()
 		if (AProject8PlayerController* MyPlayerController = Cast<AProject8PlayerController>(PlayerController))
 		{
 			MyPlayerController->SetPause(true);
-			MyPlayerController->GetMenuComponent()->ShowMainMenu();
+			MyPlayerController->GetMenuComponent()->ShowGameOverMenu();
 		}
 	}
 }
@@ -160,7 +191,7 @@ void AMyGameState::OnCoinCollected()
 
 	if (SpawnedCoinCount > 0 && CollectedCoinCount >= SpawnedCoinCount)
 	{
-		EndLevel();
+		EndWave();
 	}
 }
 
@@ -175,7 +206,7 @@ void AMyGameState::UpdateHUD()
 			{
 				if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("TimeValue"))))
 				{
-					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
+					float RemainingTime = GetWorldTimerManager().GetTimerRemaining(WaveTimerHandle);
 					TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time: %.1f"), RemainingTime)));
 				}
 				
@@ -194,7 +225,12 @@ void AMyGameState::UpdateHUD()
 				if (UTextBlock* LevelText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
 				{
 					LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level %d"), CurrentLevelIndex + 1)));
-				}	
+				}
+				
+				if (UTextBlock* WaveText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("WaveValue"))))
+				{
+					WaveText->SetText(FText::FromString(FString::Printf(TEXT("Wave: %d / %d"), CurrentWave, MaxWaves)));
+				}
 			}
 			
 		}

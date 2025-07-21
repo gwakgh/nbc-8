@@ -26,6 +26,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MainMenu")
 	UUserWidget* MainMenuInstance;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameOver")
+	TSubclassOf<UUserWidget> GameOverMenuClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GameOver")
+	UUserWidget* GameOverMenuInstance;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PauseMenu")
 	TSubclassOf<UUserWidget> PauseMenuClass;
 
@@ -50,7 +56,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PauseMenu")
 	void GobackToMainMenu();
 
-	void CloseMainMenu();
+	void ShowGameOverMenu();
 	
 	void Initialize(AProject8PlayerController* Controller);
 	

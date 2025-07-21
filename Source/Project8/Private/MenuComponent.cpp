@@ -1,7 +1,10 @@
 #include "MenuComponent.h"
+
+#include "MyGameInstance.h"
 #include "Project8PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
 
 UMenuComponent::UMenuComponent()
 	: HUDInstance(nullptr),
@@ -57,6 +60,39 @@ void UMenuComponent::ShowMainMenu()
 		}
 	}
 }
+void UMenuComponent::ShowGameOverMenu()
+{
+	ClearAllWidgets();
+
+	if (!PauseMenuClass) return;
+	APlayerController* PC = Cast<APlayerController>(GetOwner());
+	if (PC)
+	{
+		AProject8PlayerController* P8Controller = Cast<AProject8PlayerController>(PC);
+		if (P8Controller)
+		{
+			GameOverMenuInstance = CreateWidget<UUserWidget>(P8Controller, GameOverMenuClass);
+			if (!GameOverMenuInstance) return;
+
+			GameOverMenuInstance->AddToViewport();
+			P8Controller->SetUIInputMode();
+			
+			UFunction* PlayAnimFunc = GameOverMenuInstance->FindFunction("PlayGameOverAnim");
+			if (PlayAnimFunc)
+			{
+				GameOverMenuInstance->ProcessEvent(PlayAnimFunc, nullptr);
+			}
+			UTextBlock* TotalScoreText = Cast<UTextBlock>(GameOverMenuInstance->GetWidgetFromName(TEXT("TotalScoreText")));
+			if (TotalScoreText)
+			{
+				if (UMyGameInstance* MyGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(P8Controller)))
+				{
+					TotalScoreText->SetText(FText::FromString(FString::Printf(TEXT("Total Score: %d"), MyGameInstance->TotalScore)));
+				}
+			}
+		}
+	}
+}
 void UMenuComponent::ShowPauseMenu()
 {
 	ClearAllWidgets();
@@ -98,6 +134,7 @@ void UMenuComponent::GobackToMainMenu()
 	ShowMainMenu();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicMap"));
 }
+
 
 UUserWidget* UMenuComponent::GetHUDWidget() const
 {

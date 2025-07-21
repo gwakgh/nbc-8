@@ -8,15 +8,29 @@ UCLASS()
 class PROJECT8_API AMyGameState : public AGameState
 {
 	GENERATED_BODY()
-		
+
+protected:
+	virtual void BeginPlay() override;
+	
+	void StartWave();
+	void EndWave();
+	void OnWaveTimeUp();
 public:
 	AMyGameState();
 
 	FTimerHandle LevelTimerHandle;
+	FTimerHandle WaveTimerHandle;
 	FTimerHandle HUDUpdateHandle;
 
 
-	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere, Category = "Wave")
+	int32 CurrentWave;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Wave")
+	int32 MaxWaves;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Wave")
+	float WaveDuration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Coin")
 	int32 SpawnedCoinCount;
