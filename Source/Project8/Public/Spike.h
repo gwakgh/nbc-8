@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ItemBase.h"
+#include "Components/TimelineComponent.h"
 #include "Spike.generated.h"
 
 class USphereComponent;
@@ -24,6 +25,27 @@ protected:
 	float SpikeRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mine")
 	int SpikeDamage;
+
+	
+	UFUNCTION()
+	void TimelineProgress(float Value);
+	
+	FOnTimelineFloat InterpFunction{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTimelineComponent* SpikeTimeline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCurveFloat* SpikeCurve;
+	
+	UPROPERTY(VisibleAnywhere)
+	FVector StartLocation;
+
+	UPROPERTY(VisibleAnywhere)
+	FVector EndLocation;
+
+	UPROPERTY(EditAnywhere)
+	float SpikeZOffset;
 
 	virtual void OnItemEndOverlap(
 		UPrimitiveComponent* OverlappedComp,
