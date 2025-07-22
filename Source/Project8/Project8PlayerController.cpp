@@ -52,6 +52,7 @@ void AProject8PlayerController::StartGame()
 	{
 		MyGameInstance->TotalScore = 0;
 		MyGameInstance->CurrentLevelIndex = 0;
+		MyGameInstance->CharacterHealth = 100.f;
 	}
 	SetGameInputMode();
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("AdvancedLevel"));
