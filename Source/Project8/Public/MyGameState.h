@@ -50,6 +50,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
 	TArray<FName> LevelNames;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+	TSubclassOf<AActor> SpikeItemClass;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Score")
 	int32 Score;
 

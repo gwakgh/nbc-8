@@ -18,6 +18,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spawn Volume")
 	AActor* SpawnRandomItem();
 
+	AActor* SpawnItem(TSubclassOf<AActor> ItemClass);
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawn Volume")
@@ -27,8 +28,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Volume")
 	UDataTable* ItemDataTable;
-
-	AActor* SpawnItem(TSubclassOf<AActor> ItemClass);
 	
 	FVector GetRandomPointInVolume() const;
 	

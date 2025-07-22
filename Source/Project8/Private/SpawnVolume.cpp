@@ -22,7 +22,7 @@ FVector ASpawnVolume::GetRandomPointInVolume() const
 	return BoxOrigin + FVector(
 		FMath::RandRange(-BoxExtent.X, BoxExtent.X),
 		FMath::RandRange(-BoxExtent.Y, BoxExtent.Y),
-		FMath::RandRange(-BoxExtent.Z, BoxExtent.Z));
+		BoxExtent.Z);
 }
 
 FItemSpawnRow* ASpawnVolume::GetRandomItem() const
