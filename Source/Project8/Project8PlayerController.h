@@ -9,6 +9,7 @@
 class UNiagaraSystem;
 class UInputMappingContext;
 class UInputAction;
+class UAudioComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 

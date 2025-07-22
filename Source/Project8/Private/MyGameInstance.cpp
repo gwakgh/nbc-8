@@ -4,6 +4,7 @@ UMyGameInstance::UMyGameInstance()
 {
 	TotalScore = 0;
 	CurrentLevelIndex = 0;
+	CharacterHealth = 100.f;
 }
 
 void UMyGameInstance::AddToScore(int32 Amount)

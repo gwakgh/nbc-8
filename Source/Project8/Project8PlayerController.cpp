@@ -1,20 +1,13 @@
 #include "Project8PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "Blueprint/UserWidget.h"
-#include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Project8Character.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
-#include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
-
 #include "MyGameInstance.h"
-#include "MyGameState.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -31,6 +24,7 @@ AProject8PlayerController::AProject8PlayerController()
 	DefaultMouseCursor = EMouseCursor::Default;
 	CachedDestination = FVector::ZeroVector;
 	FollowTime = 0.f;
+
 }
 
 float AProject8PlayerController::GetReverseEffectRemainingTime() const
@@ -41,8 +35,7 @@ float AProject8PlayerController::GetReverseEffectRemainingTime() const
 void AProject8PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-    
+	
 	FString CurrentMapName = GetWorld()->GetMapName();
 	if (CurrentMapName.Contains(TEXT("BasicMap")))
 	{
@@ -61,7 +54,7 @@ void AProject8PlayerController::StartGame()
 		MyGameInstance->CurrentLevelIndex = 0;
 	}
 	SetGameInputMode();
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BasicLevel"));
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("AdvancedLevel"));
 }
 
 UMenuComponent* AProject8PlayerController::GetMenuComponent() const

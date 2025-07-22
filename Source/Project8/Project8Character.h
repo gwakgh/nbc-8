@@ -65,6 +65,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetHealth() const;
 	
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void SetHealth(float NewHealth);
+	
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetMaxHealthBP() const;
 	

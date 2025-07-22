@@ -2,6 +2,7 @@
 #include "MyGameInstance.h"
 #include "SpawnVolume.h"
 #include "CoinItem.h"
+#include "Project8Character.h"
 #include "Project8PlayerController.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -73,6 +74,21 @@ void AMyGameState::StartWave()
 			}
 		}
 	}
+	if (CurrentWave > 1)
+	{
+		if (SpikeItemClass && FoundVolumes.Num() > 0)
+		{
+			ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
+			if (SpawnVolume)
+			{
+				int SpikeCount = (CurrentWave - 1) * 9;
+				for (int i = 0; i < SpikeCount; ++i)
+				{
+					SpawnVolume->SpawnItem(SpikeItemClass);
+				}
+			}
+		}
+	}
 
 	GetWorldTimerManager().SetTimer(
 	   WaveTimerHandle,
@@ -115,6 +131,12 @@ void AMyGameState::StartLevel()
 		{
 			Score = MyGameInstance->TotalScore;
 			CurrentLevelIndex = MyGameInstance->CurrentLevelIndex;
+			
+			AProject8Character* PlayerCharacter = Cast<AProject8Character>(GetWorld()->GetFirstPlayerController()->GetPawn());
+			if (PlayerCharacter)
+			{
+				PlayerCharacter->SetHealth(MyGameInstance->CharacterHealth);
+			}
 		}
 	}
 }
@@ -131,6 +153,12 @@ void AMyGameState::EndLevel()
 			AddScore(Score);
 			CurrentLevelIndex++;
 			MyGameInstance->CurrentLevelIndex = CurrentLevelIndex;
+
+			AProject8Character* PlayerCharacter = Cast<AProject8Character>(GetWorld()->GetFirstPlayerController()->GetPawn());
+			if (PlayerCharacter)
+			{
+				MyGameInstance->CharacterHealth = PlayerCharacter->GetHealth();
+			}
 		}
 		
 	}

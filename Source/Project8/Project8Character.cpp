@@ -74,6 +74,11 @@ int32 AProject8Character::GetHealth() const
 	return Health;
 }
 
+void AProject8Character::SetHealth(float NewHealth)
+{
+	Health = NewHealth;
+}
+
 int32 AProject8Character::GetMaxHealthBP() const
 {
 	return MaxHealth;
