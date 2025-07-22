@@ -10,6 +10,7 @@ ASpike::ASpike()
 
 	SpikeDamage = 15;
 	SpikeRadius = 100;
+	SpikeZOffset = 100;
 	VisibleDuration = 3.f;
 	HiddenDuration = 1.2f;
 
@@ -24,6 +25,8 @@ ASpike::ASpike()
 	DamageCollision->SetupAttachment(Root);
 
 	RotatingMovementComp->RotationRate = FRotator::ZeroRotator;
+	
+	SpikeTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("SpikeTimeline"));
 
 }
 
@@ -31,8 +34,28 @@ void ASpike::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StartLocation = GetActorLocation();
+	EndLocation = StartLocation + FVector(0.f, 0.f, SpikeZOffset);
+
+	if (SpikeCurve)
+	{
+		InterpFunction.BindUFunction(this, FName("TimelineProgress"));
+		SpikeTimeline->AddInterpFloat(SpikeCurve, InterpFunction);
+		SpikeTimeline->SetLooping(false);
+		SpikeTimeline->SetPlayRate(1.f);
+		SpikeTimeline->SetNewTime(0.f);
+		TimelineProgress(0.f);
+	}
+
 	Disappear();
 }
+
+void ASpike::TimelineProgress(float Value)
+{
+	FVector NewLocation = FMath::Lerp(StartLocation, EndLocation, Value);
+	SetActorLocation(NewLocation);
+}
+
 void ASpike::OnItemEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                               int32 OtherBodyIndex)
 {
@@ -42,11 +65,13 @@ void ASpike::OnItemEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Other
 
 void ASpike::Disappear()
 {
-	SetActorHiddenInGame(true);
+	//SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
 	bIsActivating = false;
 	bIsDamaged = false;
+
+	SpikeTimeline->ReverseFromEnd();
 
 	GetWorld()->GetTimerManager().SetTimer(
 		VisibleTimerHandle,
@@ -58,10 +83,12 @@ void ASpike::Disappear()
 
 void ASpike::Appear()
 {
-	SetActorHiddenInGame(false);
+	//SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 	
 	bIsActivating = true;
+
+	SpikeTimeline->PlayFromStart();
 
 	TArray<AActor*> OverlappingActors;
 	DamageCollision->GetOverlappingActors(OverlappingActors, TSubclassOf<ACharacter>(ACharacter::StaticClass()));
