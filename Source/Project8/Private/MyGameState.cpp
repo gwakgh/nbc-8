@@ -56,7 +56,7 @@ void AMyGameState::StartWave()
 	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
-	int SpawnItemCount = (CurrentLevelIndex + 1) * 10 + (CurrentWave + 1) * 5;
+	int SpawnItemCount = (CurrentLevelIndex + 1) * 6 + (CurrentWave + 1) * 6;
 	const int32 ItemToSpawn = FMath::RandRange(SpawnItemCount - 5, SpawnItemCount + 5);
 	
 	for (int32 i = 0; i < ItemToSpawn; i++)
@@ -81,7 +81,7 @@ void AMyGameState::StartWave()
 			ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
 			if (SpawnVolume)
 			{
-				int SpikeCount = (CurrentWave - 1) * 9;
+				int SpikeCount = (CurrentWave - 1) * 8;
 				for (int i = 0; i < SpikeCount; ++i)
 				{
 					SpawnVolume->SpawnItem(SpikeItemClass);
