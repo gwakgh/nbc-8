@@ -10,7 +10,3 @@ Saved/
 *.suo
 *.xcodeproj
 *.xcworkspace
-
-# Git LFS 파일 제외 (필요 시 따로 지정)
-*.uasset
-*.umap
